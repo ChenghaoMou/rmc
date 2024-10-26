@@ -64,6 +64,7 @@ def blocks_to_svg(
     output,
     debug=0,
     xpos_shift=XPOS_SHIFT,
+    ypos_shift=0,
     screen_width=SCREEN_WIDTH,
     screen_height=SCREEN_HEIGHT,
 ):
@@ -75,7 +76,7 @@ def blocks_to_svg(
 
     # get document dimensions
     svg_doc_info = get_dimensions(
-        [block for block, _ in blocks], debug, xpos_shift, screen_width, screen_height
+        [block for block, _ in blocks], debug, xpos_shift=xpos_shift, ypos_shift=ypos_shift, screen_width=screen_width, screen_height=screen_height
     )
 
     # add svg header
@@ -92,9 +93,9 @@ def blocks_to_svg(
 
     for block, color in blocks:
         if isinstance(block, SceneLineItemBlock):
-            draw_stroke(block, output, svg_doc_info, debug, color, xpos_shift)
+            draw_stroke(block, output, svg_doc_info, debug, color)
         elif isinstance(block, RootTextBlock):
-            draw_text(block, output, svg_doc_info, debug, xpos_shift)
+            draw_text(block, output, svg_doc_info, debug)
         else:
             if debug > 0:
                 print(f"warning: not converting block: {block.__class__}")
@@ -111,7 +112,7 @@ def blocks_to_svg(
     output.write("</svg>\n")
 
 
-def draw_stroke(block, output, svg_doc_info, debug, color, xpos_shift):
+def draw_stroke(block, output, svg_doc_info, debug, color):
     if debug > 0:
         print("----SceneLineItemBlock")
     # a SceneLineItemBlock contains a stroke
@@ -145,6 +146,9 @@ def draw_stroke(block, output, svg_doc_info, debug, color, xpos_shift):
         # align the original position
         xpos = point.x + svg_doc_info.xpos_delta
         ypos = point.y + svg_doc_info.ypos_delta
+        assert 0 <= xpos <= svg_doc_info.width, f"xpos: {xpos} width: {svg_doc_info.width}"
+        assert 0 <= ypos <= svg_doc_info.height, f"ypos: {ypos} height: {svg_doc_info.height}"
+
         # stretch the original position
         # ratio = (svg_doc_info.height / svg_doc_info.width) / (1872 / 1404)
         # if ratio > 1:
@@ -202,20 +206,26 @@ def draw_text(block, output, svg_doc_info, debug):
     # add some style to get readable text
     output.write("        <style>\n")
     output.write("            .default {\n")
-    output.write("                font: 50px serif\n")
+    output.write("                font: 40px sans-serif\n")
     output.write("            }\n")
     output.write("        </style>\n")
 
-    for text_item in block.text_items:
+    content = "            \n"
+    xpos = block.value.pos_x + svg_doc_info.xpos_delta
+    ypos = block.value.pos_y + svg_doc_info.ypos_delta
+        
+    for text_item in block.value.items.sequence_items():
         # BEGIN text
         # https://developer.mozilla.org/en-US/docs/Web/SVG/Element/text
-        xpos = block.pos_x + svg_doc_info.width / 2
-        ypos = block.pos_y + svg_doc_info.height / 2
-        output.write(f"        <!-- TextItem item_id: {text_item.item_id} -->\n")
-        if text_item.text.strip():
-            output.write(
-                f'        <text x="{xpos}" y="{ypos}" class="default">{text_item.text.strip()}</text>\n'
-            )
+        content += text_item.value
+    
+    offset = 0.6 * len(content.split('\n'))
+    content = f"            <tspan x='{xpos}' dy='{offset}em'>{content}</tspan>\n"
+    output.write(f"        <!-- RootTextBlock item_id: {block.block_id} -->\n")
+    if content:
+        output.write(
+            f'        <text x="{xpos}" y="{ypos}" class="default">{content}</text>\n'
+        )
 
 
 def get_limits(blocks):
@@ -273,6 +283,7 @@ def get_dimensions(
     blocks,
     debug,
     xpos_shift=XPOS_SHIFT,
+    ypos_shift=0,
     screen_width=SCREEN_WIDTH,
     screen_height=SCREEN_HEIGHT,
 ):
@@ -284,11 +295,11 @@ def get_dimensions(
     # of the doc **iff there are no text boxes**. When you add
     # text boxes, the xpos/ypos values change.
     xpos_delta = xpos_shift
-    if xmin is not None and (xmin + xpos_shift) < 0:
-        # make sure there are no negative xpos
-        xpos_delta += -(xmin + xpos_shift)
+    # if xmin is not None and (xmin + xpos_shift) < 0:
+    #     # make sure there are no negative xpos
+    #     xpos_delta += -(xmin + xpos_shift)
     # ypos_delta = SCREEN_HEIGHT / 2
-    ypos_delta = 0
+    ypos_delta = ypos_shift
     # adjust dimensions if needed
     width = int(
         math.ceil(
