@@ -123,10 +123,11 @@ class Pen:
             return Mechanical_Pencil(width, color_id)
         # Highlighter
         elif pen_nr == 5 or pen_nr == 18:
-            width = 15
+            width = 25
             return Highlighter(width, color_id)
         # Shader
         elif pen_nr == 23:
+            width = 12
             return Shader(width, color_id)
         # Erase area
         elif pen_nr == 8:
@@ -244,8 +245,8 @@ class Highlighter(Pen):
 class Shader(Pen):
     def __init__(self, base_width, base_color_id):
         super().__init__(base_width, base_color_id)
-        self.stroke_linecap = "square"
-        self.base_opacity = 0.3
+        self.stroke_linecap = "round"
+        self.base_opacity = 0.1
         # self.stroke_opacity = 0.2
         self.name = "Shader"
 
