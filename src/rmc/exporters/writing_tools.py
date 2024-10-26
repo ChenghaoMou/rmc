@@ -7,6 +7,8 @@ https://github.com/chemag/maxio .
 import logging
 import math
 
+from rmscene.scene_items import PenColor
+
 _logger = logging.getLogger(__name__)
 
 
@@ -15,38 +17,51 @@ _logger = logging.getLogger(__name__)
 #   (see scene_stream.py):
 remarkable_palette = {
     # BLACK = 0
-    0: [0, 0, 0],
+    PenColor.BLACK: [0, 0, 0],
     # GRAY = 1
-    1: [125, 125, 125],
+    PenColor.GRAY: [125, 125, 125],
     # WHITE = 2
-    2: [255, 255, 255],
+    PenColor.WHITE: [255, 255, 255],
     # https://www.color-name.com/highlighter-yellow.color
     # YELLOW = 3
-    3: [251, 247, 25],
+    PenColor.YELLOW: [251, 247, 25],
     # GREEN = 4
-    4: [0, 255, 0],
+    PenColor.GREEN: [0, 255, 0],
     # PINK = 5
     # https://www.rapidtables.com/web/color/pink-color.html
-    5: [255, 192, 203],
+    PenColor.PINK: [255, 192, 203],
     # BLUE = 6
-    6: [0, 0, 255],
+    PenColor.BLUE: [0, 0, 255],
     # RED = 7
-    7: [255, 0, 0],
+    PenColor.RED: [255, 0, 0],
     # GRAY_OVERLAP = 8
-    8: [125, 125, 125],
+    PenColor.GRAY_OVERLAP: [125, 125, 125],
+    # HIGHLIGHT = 9
+    # Skipped as different colors are used for highlights
+    # GREEN_2 = 10
+    PenColor.GREEN_2: [0, 128, 0],
+    # CYAN = 11
+    PenColor.CYAN: [0, 255, 255],
+    # MAGENTA = 12
+    PenColor.MAGENTA: [255, 0, 255],
 }
 
 
 class Pen:
-    def __init__(self, base_width, base_color_id):
+    def __init__(self, base_width, base_color_id: int | tuple[int, int, int, int]):
         self.base_width = base_width
-        self.base_color = remarkable_palette[base_color_id]
+        if isinstance(base_color_id, int) and base_color_id in remarkable_palette:
+            self.base_color = remarkable_palette[base_color_id]
+            self.stroke_opacity = 1
+        else:
+            self.base_color = base_color_id[:3]
+            self.stroke_opacity = base_color_id[3] / 255
+
         self.segment_length = 1000
         self.base_opacity = 1
         self.name = "Basic Pen"
         # initial stroke values
         self.stroke_linecap = "round"
-        self.stroke_opacity = 1
         self.stroke_width = base_width
         self.stroke_color = base_color_id
 
@@ -108,6 +123,9 @@ class Pen:
         elif pen_nr == 5 or pen_nr == 18:
             width = 15
             return Highlighter(width, color_id)
+        # Shader
+        elif pen_nr == 23:
+            return Shader(width, color_id)
         # Erase area
         elif pen_nr == 8:
             return Erase_Area(width, color_id)
@@ -218,8 +236,16 @@ class Highlighter(Pen):
         super().__init__(base_width, base_color_id)
         self.stroke_linecap = "square"
         self.base_opacity = 0.3
-        self.stroke_opacity = 0.2
+        # self.stroke_opacity = 0.2
         self.name = "Highlighter"
+
+class Shader(Pen):
+    def __init__(self, base_width, base_color_id):
+        super().__init__(base_width, base_color_id)
+        self.stroke_linecap = "square"
+        self.base_opacity = 0.3
+        # self.stroke_opacity = 0.2
+        self.name = "Shader"
 
 
 class Eraser(Pen):
