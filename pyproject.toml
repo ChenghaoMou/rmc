@@ -23,4 +23,4 @@ dev-dependencies = [
 ]
 
 [tool.uv.sources]
-rmscene = { git = "https://github.com/ChenghaoMou/rmscene.git" }
+rmscene = { path = "../rmscene", editable = true }

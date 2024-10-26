@@ -19,7 +19,7 @@ remarkable_palette = {
     # BLACK = 0
     PenColor.BLACK: [0, 0, 0],
     # GRAY = 1
-    PenColor.GRAY: [125, 125, 125],
+    PenColor.GRAY: [144, 144, 144],
     # WHITE = 2
     PenColor.WHITE: [255, 255, 255],
     # https://www.color-name.com/highlighter-yellow.color
@@ -31,19 +31,21 @@ remarkable_palette = {
     # https://www.rapidtables.com/web/color/pink-color.html
     PenColor.PINK: [255, 192, 203],
     # BLUE = 6
-    PenColor.BLUE: [0, 0, 255],
+    PenColor.BLUE: [78, 105, 201],
     # RED = 7
-    PenColor.RED: [255, 0, 0],
+    PenColor.RED: [179, 62, 57],
     # GRAY_OVERLAP = 8
     PenColor.GRAY_OVERLAP: [125, 125, 125],
     # HIGHLIGHT = 9
     # Skipped as different colors are used for highlights
     # GREEN_2 = 10
-    PenColor.GREEN_2: [0, 128, 0],
+    PenColor.GREEN_2: [161, 216, 125],
     # CYAN = 11
-    PenColor.CYAN: [0, 255, 255],
+    PenColor.CYAN: [139, 208, 229],
     # MAGENTA = 12
-    PenColor.MAGENTA: [255, 0, 255],
+    PenColor.MAGENTA: [183, 130, 205],
+    # YELLOW_2 = 13
+    PenColor.YELLOW_2: [247, 232, 81],
 }
 
 
